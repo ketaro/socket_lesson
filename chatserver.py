@@ -106,7 +106,6 @@ class Server:
 
     # Main Server Loop
     def run(self):
-        self.open_socket()
         # Input Sources
         self.inputs = [self.server, sys.stdin]
 
@@ -134,7 +133,7 @@ class Server:
         self.shutdown()
 
 
-
+# Class to keep track of a connected client
 class Client:
     def __init__(self, (socket, address)):
         self.socket     = socket
@@ -158,5 +157,9 @@ class Client:
 
 
 if __name__ == "__main__":
+    # Create our server instance
     s = Server()
+    # Start Listening for incomming connections
+    s.open_socket()
+    # Main loop of our server
     s.run()
