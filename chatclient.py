@@ -3,7 +3,7 @@ import socket
 import sys
 
 HOST="localhost"
-PORT=5000
+PORT=5555
 
 
 # Create a connection to the chat server, return the socket
