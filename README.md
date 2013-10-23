@@ -106,11 +106,11 @@ On the server window you have open, you should see
 
 What we've written so far works...kinda...  It at least sends some data back and forth.  We could maybe put the code we've written in a loop to keep exchanging data back and forth, but that still wouldn't be ideal... we'd only see new messages from the server after we send a message (and we wouldn't be able to send a message until we receive a message).  Not ideal.
 
-So what we need to do is check with our input sources (our server socket and the keyboard) to see if they have data ready for us.  We can then handle that data as it comes in.
+So we know how to wait for data from one input source (we've already done that), but how do we wait for data that could come from two different places (our server socket and the keyboard)?  How do we know which one is ready and needs to be handled?
 
-Python gives us another module that makes that easy, it's called "select".  If we give it a list of sources (our socket and our keyboard (aka stdin)), it will tell us if any of those sources have data ready to be read.
+Python gives us another module that makes that easy, it's called "[select](http://docs.python.org/2/library/select.html#select.select)".  If we give it a list of sources (our socket and our keyboard (aka sys.stdin)), it will tell us if any of those sources have data ready to be read.
 
-
+So before we call my_socket.recv() or sys.stdin.readline(), we can call select.select() which will wait until data is ready to be read.  When data is available, the connection that's ready will be returned.
 
 So now we could write something along the lines of:
 
@@ -135,7 +135,9 @@ So when the server has something new to send us, we can display it on the screen
 
 For our exercise, we only care about reading, so we'll just send empty lists for the other arguments.
 
-Another great things about select.select() -- we can treat our keyboard input (sys.stdin) like we do a socket and it will let us know when a user has enter new data on the keyboard.
+You may have noticed another thing that was added in that example -- If select says our socket is ready to receive data but recv() doesn't return any data, it probably means our socket has been disconnected.
+
+Another great thing about select.select() -- we can treat our keyboard input (sys.stdin) like we do a socket and it will let us know when a user has enter new data on the keyboard.
 
 Update the code you've written to also listen for input from sys.stdin, only when we get data from that input source, we want to send it to our server socket.
 
@@ -154,8 +156,3 @@ If you get everything above working, you should have a basic chat server running
 ** open_connection(host, port) that returns a new socket connection
 ** format_message(message) - Format any messages returned from our server.  If the message has a username, format the output so it looks like:  [username] Message
 ** If the user enters '/quit' it should exit the program
-
-		
-		
-
-
