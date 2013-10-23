@@ -1,21 +1,22 @@
-#Socket To Me
+#Socket To Me[*](http://www.youtube.com/watch?v=w0gYhuUzx8Q)
 You've been working with network applications for a little while now.  You've written a couple Flask applications and have noticed that they don't run like the previous things we've written.  Instead of running some code and exiting, when we run the Flask app, it sits there...listening...waiting for something (a web browser) to connect to it.
 
 Flask has taken care of all the details of how that works -- all you've had to do was invoke it.  In this exercise, we're going to dive a little bit into how to make a network application and how to get two python programs to talk to each other over a network.
 
-#May I be of Service?
+##May I be of Service?
 The word "server" is often overloaded to mean many different things, but for our purposes, a server is something that listens for a request and returns ("serves") a result.  We refer to the side making the request as the "client" and the side serving the request as the "server".   When accessing a web page, your web browser is the "client" and your flask application has been acting as the web "server".
 
-#Exchanging Data
+
+##Exchanging Data
 So what does it mean to write a "network" application.  We've said we want our application to "talk" to another over a network, but when we say "talk", we really just mean exchanging data.
 
-You've already written some programs that can receive data from outside the program you've written.  You've written programs that use the open() command to exchange data between a file on your local file system.  open() returns what's called a "File Object", or what other languages might call a "handle" or "pointer" to the file.  You've then used the read() or readline() functions to get data from the file, write() to send data to the file.
+You've already written some programs that can receive data from outside the program you've written.  You've written programs that use the open() command to exchange data with a file on your local file system.  The open() function returns what's called a "File Object", or what other languages might call a "handle" to the file.  You've then used the read() or readline() functions with that file object to get data from the file and write() to send data to the file.
 
 You've also written programs that get data from the keyboard.  Unlike reading from a file, your program had to wait for the user to enter data on the keyboard (using readline()) before taking that input and doing something with it.
 
-When working with network connections, we can draw some parallels to what you've already worked with.  Instead of opening a local file, we'll want to create a connection to another machine.   The server end listens for an incoming connection on a "socket".  We can call the connection from our client to the server the "socket connection".  Python (and the operation system) will handle all the hard work of making the connections happen, we'll just get a Socket Object back that we can use to do the data exchanging.
+When working with network connections, we can draw some parallels to what you've already worked with.  Instead of opening a local file, we'll want to create a connection to another machine.   The server end listens for an incoming connection on a "socket".  We can call the connection from our client to the server the "socket connection".  Python (and the operation system) will handle all the hard work of making the connections happen, we'll just get a Socket Object back that we can use to do the data exchanging.  We'll be using the [socket](http://docs.python.org/2/library/socket.html) library.
 
-#Writing a Client
+##Writing a Client
 
 Previously, to read from a file, we might have written something like this:
 
@@ -29,18 +30,18 @@ In our file example, we needed to know the name of the file we wanted to open (w
 * Where the server we want to connect to lives (it's "address")
 * Which port on the server we want to connect to (which outlet we want to plug our socket connection into)
 
-To read from a socket connection, we'll first have to import the socket module (import socket), then we can open a connection like this:
+To read from a socket connection, we'll first have to import the socket module (import socket), then we can open a connection like below.  Port numbers can be between 0 and 65535 (2^16).  We've picked the port 5555 for our chat application.  The number isn't necessarily important, what's important is that both the client and server speak on the same port number.  Servers listening on ports less than 1024 need to have root (super user) permissions.
 
 	import socket
 	
 	my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	my_socket.connect(("localhost", 5000))
+	my_socket.connect(("localhost", 5555))
 	
-If we run the above code, we'll get an error:
+Create a new file and run the code above.  However, when we run, we'll get an error:
 
 	socket.error: [Errno 111] Connection refused
 
-That's because we've told our application to connect to a server listening on port 5000 on the local machine ("localhost" always points to the machine you're on) and there's nothing currently listening on the port.  We need to run a server!
+That's because we've told our application to connect to a server listening on port 5555 on the local machine ("localhost" always points to the machine you're on) and there's nothing currently listening on the port.  We need to run a server!
 
 Clone this repository and in another terminal window run the chatserver.py application.
 
@@ -48,9 +49,9 @@ Clone this repository and in another terminal window run the chatserver.py appli
 
 You should see the following message:
 
-	Listening on :5000
+	Listening on :5555
 
-Leave that running and now run the connection code again.  This time the program should just exit without an error.  On the server window you should see that the server detected an incomming connection and then immediatly disconnected:
+Leave that running and now run the connection code again from another terminal window.  This time the program should just exit without an error.  On the server window you should see that the server detected an incomming connection and then immediatly disconnected:
 
 	Incoming Connection
 	client disconnecting
@@ -60,9 +61,9 @@ Just like with our file handle, it's good practice to call .close() on our socke
 	my_socket.close()
 
 
-## Receive Some Data
+### Receive Some Data
 
-Making a connection is fine and all, but not very interesting by itself.  The server might be trying to tell us something!  Let's try and receive what it's sending us.  With our file, we could use readline() to get an line of text.  For our Socket, we need to specify how much data we'd like receive at a time.  Networks usually break up data before sending it over the wire.  The Socket library will handle all of that for us, but chances our we haven't received all the data yet, so we usually write our network application to take this into account and read the chunks of data as they come in.
+Making a connection is fine and all, but not very interesting by itself.  The server might be trying to tell us something!  Let's try and receive what it's sending us.  With our file, we could use readline() to get a line of text.  For our Socket, we need to specify how much data we'd like receive at a time.  Networks usually break up data before sending it over the wire.  The Socket library will handle all of that for us, but chances our we haven't received all the data yet, so we usually write our network application to take this into account and read the chunks of data as they come in.
 
 For now, just add the following before your .close() command:
 
@@ -79,17 +80,17 @@ Run your client application again and you should now see a message welcoming you
 	Please enter your screen name:
 
 
-## Bi-Directional Sockets: They Go Both Ways
+### Bi-Directional Sockets: They Go Both Ways
 
-If we notice the last line of the output we received from the server, it was asking us to enter a screen name.  Just as we received data from the server socket, the server was also expecting our client to send the server some data.  Our socket connection can be bi-directional - meaning we can both send and receive data over the same connection.
+If we notice the last line of the output we received from the server, it was asking us to enter a screen name.  Just as we received data from the server socket, the server was also expecting our client to send the server some data.  Our socket connection can be bi-directional -- meaning we can both send and receive data over the same connection.
 
 To send data to the server, there are two methods of the socket class we could use: .send() and .sendall().  See the [docs](http://docs.python.org/2/library/socket.html#socket.socket.send) for more details on the differences, but for this exercise we'll want to use .sendall() which will send all the data we give it.
 
 Now alter your program so it does the following:
 
 * Receive 1024 bytes from the socket and displays them
-* Gets a line of input from the user (keyboard)
-* Sends that input to the server
+* Get a line of input from the user (keyboard) using sys.stdin
+* Send that input to the server socket
 * Receive another 1024 bytes from the socket and display
 
 If everything worked, you should see the server asking for a name.  After you enter a name you should see a message saying you logged in.
@@ -101,13 +102,15 @@ On the server window you have open, you should see
 	client disconnecting
 
 
-## Let's Chat
+### Let's Chat
 
 What we've written so far works...kinda...  It at least sends some data back and forth.  We could maybe put the code we've written in a loop to keep exchanging data back and forth, but that still wouldn't be ideal... we'd only see new messages from the server after we send a message (and we wouldn't be able to send a message until we receive a message).  Not ideal.
 
 So what we need to do is check with our input sources (our server socket and the keyboard) to see if they have data ready for us.  We can then handle that data as it comes in.
 
 Python gives us another module that makes that easy, it's called "select".  If we give it a list of sources (our socket and our keyboard (aka stdin)), it will tell us if any of those sources have data ready to be read.
+
+
 
 So now we could write something along the lines of:
 
