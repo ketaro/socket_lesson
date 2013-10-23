@@ -26,8 +26,8 @@ Previously, to read from a file, we might have written something like this:
   
 In our file example, we needed to know the name of the file we wanted to open (which we passed to the open() function).  With our socket we need to know two pieces of information:
 
-	* Where the server we want to connect to lives (it's "address")
-	* Which port on the server we want to connect to (which outlet we want to plug our socket connection into)
+* Where the server we want to connect to lives (it's "address")
+* Which port on the server we want to connect to (which outlet we want to plug our socket connection into)
 
 To read from a socket connection, we'll first have to import the socket module (import socket), then we can open a connection like this:
 
@@ -87,10 +87,10 @@ To send data to the server, there are two methods of the socket class we could u
 
 Now alter your program so it does the following:
 
-	* Receive 1024 bytes from the socket and displays them
-	* Gets a line of input from the user (keyboard)
-	* Sends that input to the server
-	* Receive another 1024 bytes from the socket and display
+* Receive 1024 bytes from the socket and displays them
+* Gets a line of input from the user (keyboard)
+* Sends that input to the server
+* Receive another 1024 bytes from the socket and display
 
 If everything worked, you should see the server asking for a name.  After you enter a name you should see a message saying you logged in.
 
@@ -126,9 +126,9 @@ So now we could write something along the lines of:
 
 So when the server has something new to send us, we can display it on the screen.  The select.select() function takes three lists of arguments for input:
 
-	* A list to check if they're available for reading
-	* A list to check if they're available for writing
-	* A list to check if they have an exception
+* A list to check if they're available for reading
+* A list to check if they're available for writing
+* A list to check if they have an exception
 
 For our exercise, we only care about reading, so we'll just send empty lists for the other arguments.
 
@@ -136,21 +136,21 @@ Another great things about select.select() -- we can treat our keyboard input (s
 
 Update the code you've written to also listen for input from sys.stdin, only when we get data from that input source, we want to send it to our server socket.
 
-	* Add sys.stdin to the list of sockets to listen if they're available for reading
-	* Make sure you're checking for what connection type was returned (for inputready)
-	* If inputready is stdin, read a line of text from the input and send it to the server socket
-	* If inputready is our server socket (my_socket), receive the data and display it on the screen
-	* Open a 3rd terminal window and run another copy of your chat client.  Can you send a message and see it in the other client window?
+* Add sys.stdin to the list of sockets to listen if they're available for reading
+* Make sure you're checking for what connection type was returned (for inputready)
+* If inputready is stdin, read a line of text from the input and send it to the server socket
+* If inputready is our server socket (my_socket), receive the data and display it on the screen
+* Open a 3rd terminal window and run another copy of your chat client.  Can you send a message and see it in the other client window?
 
 ## Extra Credit
 
 If you get everything above working, you should have a basic chat server running.  If you notice, our chat server will display any messages coming from other users by prefixing the message with the user name and "::" as a seperator.
 
-	* Clean up the code to break out sections into functions
-	** a main() function for our main program
-	** open_connection(host, port) that returns a new socket connection
-	** format_message(message) - Format any messages returned from our server.  If the message has a username, format the output so it looks like:  [username] Message
-	** If the user enters '/quit' it should exit the program
+* Clean up the code to break out sections into functions
+** a main() function for our main program
+** open_connection(host, port) that returns a new socket connection
+** format_message(message) - Format any messages returned from our server.  If the message has a username, format the output so it looks like:  [username] Message
+** If the user enters '/quit' it should exit the program
 
 		
 		
