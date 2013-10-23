@@ -33,8 +33,8 @@ To read from a socket connection, we'll first have to import the socket module (
 
 	import socket
 	
-	new_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	new_socket.connect(("localhost", 5000))
+	my_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	my_socket.connect(("localhost", 5000))
 	
 If we run the above code, we'll get an error:
 
@@ -57,7 +57,7 @@ Leave that running and now run the connection code again.  This time the program
 
 Just like with our file handle, it's good practice to call .close() on our socket when we're done with it.  Add this to the end of your program:
 
-	new_socket.close()
+	my_socket.close()
 
 
 ## Receive Some Data
@@ -66,7 +66,7 @@ Making a connection is fine and all, but not very interesting by itself.  The se
 
 For now, just add the following before your .close() command:
 
-	data = new_socket.recv(1024)
+	data = my_socket.recv(1024)
 	
 	print "received:\n%s" %  data
 
@@ -77,4 +77,82 @@ Run your client application again and you should now see a message welcoming you
 	Welcome to the Hackbright Chat Server
 	-------------------------------------
 	Please enter your screen name:
+
+
+## Bi-Directional Sockets: They Go Both Ways
+
+If we notice the last line of the output we received from the server, it was asking us to enter a screen name.  Just as we received data from the server socket, the server was also expecting our client to send the server some data.  Our socket connection can be bi-directional - meaning we can both send and receive data over the same connection.
+
+To send data to the server, there are two methods of the socket class we could use: .send() and .sendall().  See the [docs](http://docs.python.org/2/library/socket.html#socket.socket.send) for more details on the differences, but for this exercise we'll want to use .sendall() which will send all the data we give it.
+
+Now alter your program so it does the following:
+
+	* Receive 1024 bytes from the socket and displays them
+	* Gets a line of input from the user (keyboard)
+	* Sends that input to the server
+	* Receive another 1024 bytes from the socket and display
+
+If everything worked, you should see the server asking for a name.  After you enter a name you should see a message saying you logged in.
+
+On the server window you have open, you should see 
+
+	Incoming Connection
+	None -> FoofusTheCat logged in
+	client disconnecting
+
+
+## Let's Chat
+
+What we've written so far works...kinda...  It at least sends some data back and forth.  We could maybe put the code we've written in a loop to keep exchanging data back and forth, but that still wouldn't be ideal... we'd only see new messages from the server after we send a message (and we wouldn't be able to send a message until we receive a message).  Not ideal.
+
+So what we need to do is check with our input sources (our server socket and the keyboard) to see if they have data ready for us.  We can then handle that data as it comes in.
+
+Python gives us another module that makes that easy, it's called "select".  If we give it a list of sources (our socket and our keyboard (aka stdin)), it will tell us if any of those sources have data ready to be read.
+
+So now we could write something along the lines of:
+
+	running = True
+	while running:
+		inputready, outputready, exceptready = select.select([my_socket], [], [])
+		
+		for s in inputready:
+			msg = s.recv(1024)
+			
+			if msg:
+				print msg
+			else:
+				print "Disconnected from server!"
+				running = False
+
+So when the server has something new to send us, we can display it on the screen.  The select.select() function takes three lists of arguments for input:
+
+	* A list to check if they're available for reading
+	* A list to check if they're available for writing
+	* A list to check if they have an exception
+
+For our exercise, we only care about reading, so we'll just send empty lists for the other arguments.
+
+Another great things about select.select() -- we can treat our keyboard input (sys.stdin) like we do a socket and it will let us know when a user has enter new data on the keyboard.
+
+Update the code you've written to also listen for input from sys.stdin, only when we get data from that input source, we want to send it to our server socket.
+
+	* Add sys.stdin to the list of sockets to listen if they're available for reading
+	* Make sure you're checking for what connection type was returned (for inputready)
+	* If inputready is stdin, read a line of text from the input and send it to the server socket
+	* If inputready is our server socket (my_socket), receive the data and display it on the screen
+	* Open a 3rd terminal window and run another copy of your chat client.  Can you send a message and see it in the other client window?
+
+## Extra Credit
+
+If you get everything above working, you should have a basic chat server running.  If you notice, our chat server will display any messages coming from other users by prefixing the message with the user name and "::" as a seperator.
+
+	* Clean up the code to break out sections into functions
+	** a main() function for our main program
+	** open_connection(host, port) that returns a new socket connection
+	** format_message(message) - Format any messages returned from our server.  If the message has a username, format the output so it looks like:  [username] Message
+	** If the user enters '/quit' it should exit the program
+
+		
+		
+
 
